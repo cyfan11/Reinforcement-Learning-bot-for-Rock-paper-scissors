@@ -1,7 +1,6 @@
 import java.util.*;
 
 //import java.util.stream.*;
-
 public class TestBot implements RoShamBot {
     int roundsCompleted;
     ArrayList<Action> prevMoves; 
@@ -28,6 +27,7 @@ public class TestBot implements RoShamBot {
 
     public Action counter(Action opponent) {
         double coinFlip = Math.random();
+        
         if (opponent.equals(Action.ROCK)) {
             if (coinFlip <= 0.5) {
                 return Action.PAPER;
