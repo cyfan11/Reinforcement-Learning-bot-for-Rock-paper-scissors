@@ -77,14 +77,14 @@ public class BotBot implements RoShamBot {
 
         if (freqMove.size() > 0) {
 
-            return beatThis(freqMove.get(randInt.nextInt(freqMove.size())));
+            return counter(freqMove.get(randInt.nextInt(freqMove.size())));
         } else {
             return MOVES.get(randInt.nextInt(5));
         }
     }
 
 
-    public Action beatThis(Action move) {
+    public Action counter(Action move) {
         double coinFlip = Math.random();
         if (move.equals(Action.ROCK)) {
             if (coinFlip <= 0.5) {
