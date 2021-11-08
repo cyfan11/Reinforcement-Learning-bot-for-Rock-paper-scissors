@@ -1,13 +1,10 @@
 import java.util.*;
 
-
-
 public class MarkovBot implements RoShamBot {
     int roundsCompleted;
     ArrayList<Action> prevMoves;
     int[][] MarkovTable;
-    public final int ordinal()  
-    //public static Action[] actions = {Action.ROCK, Action.PAPER, Action.SCISSORS, Action.LIZARD, Action.SPOCK}; 
+    public static Action[] actions = {Action.ROCK, Action.PAPER, Action.SCISSORS, Action.LIZARD, Action.SPOCK}; 
 
     
     public MarkovBot() {
@@ -18,6 +15,10 @@ public class MarkovBot implements RoShamBot {
                 MarkovTable[i][j] = 0;
             }
         }
+    }
+
+    public void updateTable(int lastIndex, int nextIndex) {
+        MarkovTable[lastIndex][nextIndex]++;
     }
 
     public Action randomMove() {
@@ -80,6 +81,7 @@ public class MarkovBot implements RoShamBot {
 
             roundsCompleted++;
 
+            /*
             int rockCount = 0;
             int paperCount = 0;
             int scissorsCount = 0;
@@ -99,21 +101,25 @@ public class MarkovBot implements RoShamBot {
                     spockCount++;
                 } 
             }
+            */
 
-            int[] counts = {rockCount, paperCount, scissorsCount, lizardCount, spockCount};
+            //int[] counts = {rockCount, paperCount, scissorsCount, lizardCount, spockCount};
             
-            int max = 0;
-            Action opponent_fav = actions[max];
-            for (int i = 0; i < counts.length; i++) {
-                if (counts[i] > max) {
-                    max = counts[i];
-                    opponent_fav = actions[i];
+            int nextIndex = 0;
+            int prevIndex = Arrays.asList(actions).indexOf(lastOpponentMove);
+            
+            for (int i = 0; i < actions.length; i++) {
+                if (MarkovTable[prevIndex][i] > MarkovTable[prevIndex][nextIndex]) {
+                    nextIndex = i;
                 }
             }
 
-            //System.out.println(opponent_fav);
+            Action predictedNext = actions[nextIndex];
+            System.out.println(predictedNext);
 
-            return counter(opponent_fav);
+            updateTable(prevIndex, nextIndex);
+
+            return counter(predictedNext);
         } 
     } 
 }
