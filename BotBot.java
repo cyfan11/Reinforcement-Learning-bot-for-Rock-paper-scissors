@@ -102,7 +102,7 @@ public class BotBot implements RoShamBot {
             if (coinFlip <= 0.5) {
                 return Action.ROCK;
             } else {
-                return Action.SPOCK;
+                return Action.SPO
             }
         } else if (move.equals(Action.LIZARD)) {
             if (coinFlip <= 0.5) {
