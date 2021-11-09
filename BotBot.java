@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Collections;
-import java.util.*;
+//import java.util.*;
 
 
 public class BotBot implements RoShamBot {
@@ -27,7 +27,6 @@ public class BotBot implements RoShamBot {
         opPrevMoves.add(lastOpponentMove);
 
         Random randInt = new Random();
-        // Action myMove = MOVES.get(randInt.nextInt(3));
 
         if (opPrevMoves.size() < 5) {
             return MOVES.get(randInt.nextInt(5));
@@ -41,34 +40,34 @@ public class BotBot implements RoShamBot {
 
     //Returns move based on opponent's most likely move historically.
     public Action lookBack(int steps, int maxLookBack) {
+        
         List<Action> freqMove = new ArrayList<Action>();
-
-        List<Action> recent;
-        List<Action> recentHist;
+        List<Action> recentMoves;
+        List<Action> lookBackMoves;
 
         if (opPrevMoves.size() - steps >= 0) {//after 5 games
-            recent = opPrevMoves.subList(opPrevMoves.size() - steps, opPrevMoves.size());
+            recentMoves = opPrevMoves.subList(opPrevMoves.size() - steps, opPrevMoves.size());
         } else {
-            recent = opPrevMoves.subList(0, opPrevMoves.size());
+            recentMoves = opPrevMoves.subList(0, opPrevMoves.size());
         }
 
         if (opPrevMoves.size() - maxLookBack >= 0) {
-            recentHist = opPrevMoves.subList(opPrevMoves.size() - maxLookBack, opPrevMoves.size());
+            lookBackMoves = opPrevMoves.subList(opPrevMoves.size() - maxLookBack, opPrevMoves.size());
         } else {
-            recentHist = opPrevMoves.subList(0, opPrevMoves.size());
+            lookBackMoves = opPrevMoves.subList(0, opPrevMoves.size());
         }
         
 
-        int index = Collections.indexOfSubList(recentHist, recent);
+        int index = Collections.indexOfSubList(lookBackMoves, recentMoves);
 
         // Check for this move sequence in previous moves.
         while (index >= 0) {
 
-            freqMove.add(recentHist.get(index + recent.size() - 1));
+            freqMove.add(lookBackMoves.get(index + recentMoves.size() - 1));
 
-            recentHist = recentHist.subList(index + recent.size(), recentHist.size());
+            lookBackMoves = lookBackMoves.subList(index + recentMoves.size(), lookBackMoves.size());
 
-            index = Collections.indexOfSubList(recentHist, recent);
+            index = Collections.indexOfSubList(lookBackMoves, recentMoves);
         }
 
         Random randInt = new Random();
@@ -102,7 +101,7 @@ public class BotBot implements RoShamBot {
             if (coinFlip <= 0.5) {
                 return Action.ROCK;
             } else {
-                return Action.SPO
+                return Action.SPOCK;
             }
         } else if (move.equals(Action.LIZARD)) {
             if (coinFlip <= 0.5) {
