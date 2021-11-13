@@ -10,6 +10,7 @@ public class BotBot implements RoShamBot {
     
     public List<Action> myPrevMoves;
     public List<Action> opPrevMoves;
+    public int[] winLoseCounts;
 
 
     private static final List<Action> MOVES =
@@ -19,6 +20,7 @@ public class BotBot implements RoShamBot {
     public BotBot() {
         myPrevMoves = new ArrayList<Action>();
         opPrevMoves = new ArrayList<Action>();
+        winLoseCounts = new int[10000];
     }
     
     // Returns the bot's next move.
@@ -35,6 +37,7 @@ public class BotBot implements RoShamBot {
         Action myMove = lookBack(5, 500);//look back at max 500 rounds for now
 
         myPrevMoves.add(myMove);
+        
         return myMove;
     }
 
@@ -71,12 +74,27 @@ public class BotBot implements RoShamBot {
         }
 
         Random randInt = new Random();
+        int winCount = 0;
+        for (int i=0; i<opPrevMoves.size(); i++){
+            if (winLoseCounts.length>0){
+                if (winLoseCounts[i] == 0){
+                    winCount -=1;}
+                else if (winLoseCounts[i] == 2){
+                    winCount +=1;
+                }
+            }
 
-
+        }
+        
 
         if (freqMove.size() > 0) {
-
-            return counter(freqMove.get(randInt.nextInt(freqMove.size())));
+            if (winCount > -400){
+                return counter(freqMove.get(randInt.nextInt(freqMove.size())));
+            }
+            //System.out.println(myPrevMoves);
+            else{
+                return counter(counter(counter(freqMove.get(randInt.nextInt(freqMove.size())))));
+            }
         } else {
             return MOVES.get(randInt.nextInt(5));
         }
@@ -116,5 +134,53 @@ public class BotBot implements RoShamBot {
                 return Action.LIZARD;
             }
         }
-}
-}
+    } 
+
+
+    public void runRound() {
+        Action a1;
+        Action a2;
+        
+        if (opPrevMoves.size() == 0) {
+            // For very first round, we pretend that both players threw ROCK
+            // on previous round.
+            a1 = Action.ROCK;
+            a2 = Action.ROCK;
+        }
+        else {
+            // Pass in opponent's last move
+            a1 = myPrevMoves.get(myPrevMoves.size()-1);
+            a2 = opPrevMoves.get(myPrevMoves.size()-1);
+        }
+        
+        // Determine winner, update scores and record the player actions.
+        boolean p1Win = (((a1 == Action.SCISSORS) && (a2 == Action.PAPER)) ||
+                         ((a1 == Action.PAPER) && (a2 == Action.ROCK)) ||
+                         ((a1 == Action.ROCK) && (a2 == Action.LIZARD)) ||
+                         ((a1 == Action.LIZARD) && (a2 == Action.SPOCK)) ||
+                         ((a1 == Action.SPOCK) && (a2 == Action.SCISSORS)) ||
+                         ((a1 == Action.SCISSORS) && (a2 == Action.LIZARD)) ||
+                         ((a1 == Action.LIZARD) && (a2 == Action.PAPER)) ||
+                         ((a1 == Action.PAPER) && (a2 == Action.SPOCK)) ||
+                         ((a1 == Action.SPOCK) && (a2 == Action.ROCK)) ||
+                         ((a1 == Action.ROCK) && (a2 == Action.SCISSORS)));
+        
+        boolean p2Win = (((a2 == Action.SCISSORS) && (a1 == Action.PAPER)) ||
+                         ((a2 == Action.PAPER) && (a1 == Action.ROCK)) ||
+                         ((a2 == Action.ROCK) && (a1 == Action.LIZARD)) ||
+                         ((a2 == Action.LIZARD) && (a1 == Action.SPOCK)) ||
+                         ((a2 == Action.SPOCK) && (a1 == Action.SCISSORS)) ||
+                         ((a2 == Action.SCISSORS) && (a1 == Action.LIZARD)) ||
+                         ((a2 == Action.LIZARD) && (a1 == Action.PAPER)) ||
+                         ((a2 == Action.PAPER) && (a1 == Action.SPOCK)) ||
+                         ((a2 == Action.SPOCK) && (a1 == Action.ROCK)) ||
+                         ((a2 == Action.ROCK) && (a1 == Action.SCISSORS)));
+        
+        if (p1Win)
+            winLoseCounts[winLoseCounts.length] = 0;
+        else if (p2Win)
+            winLoseCounts[winLoseCounts.length] = 2;
+        else // tie
+            winLoseCounts[winLoseCounts.length] = 1;
+    }
+    }
