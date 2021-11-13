@@ -3,7 +3,7 @@ import java.util.*;
 public class MarkovBot implements RoShamBot {
     int roundsCompleted;
     ArrayList<Action> prevMoves;
-    int[][] MarkovTable;
+    int[][] MarkovTable = new int[actions.length][actions.length];
     public static Action[] actions = {Action.ROCK, Action.PAPER, Action.SCISSORS, Action.LIZARD, Action.SPOCK}; 
 
     
