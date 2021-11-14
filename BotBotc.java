@@ -6,7 +6,7 @@ import java.util.Collections;
 //import java.util.*;
 
 
-public class BotBot implements RoShamBot {
+public class BotBotc implements RoShamBot {
     
     public List<Action> myPrevMoves;
     public List<Action> opPrevMoves;
@@ -17,7 +17,7 @@ public class BotBot implements RoShamBot {
         Collections.unmodifiableList(Arrays.asList(Action.values()));
 
 
-    public BotBot() {
+    public BotBotc() {
         myPrevMoves = new ArrayList<Action>();
         opPrevMoves = new ArrayList<Action>();
         winLoseCounts = new int[10000];
