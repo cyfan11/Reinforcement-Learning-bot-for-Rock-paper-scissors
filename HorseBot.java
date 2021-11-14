@@ -84,6 +84,13 @@ public class HorseBot implements RoShamBot {
         }
         return pairs;
     }
+
+    public static <A, B> List<Map.Entry<Action, Action>> zipJava8(ArrayList<Action> as, ArrayList<Action> bs) {
+        return IntStream.range(0, Math.min(as.size(), bs.size()))
+                .mapToObj(i -> Map.entry(as.get(i), bs.get(i)))
+                .collect(Collectors.toList());
+    }
+
     public Action getNextMove(Action lastOpponentMove) {
         if (this.roundsCompleted < 2) {
             this.prevMoves.add(lastOpponentMove);
@@ -92,7 +99,8 @@ public class HorseBot implements RoShamBot {
         } else {
             roundsCompleted++;
 
-            Action[][] pairs = zip(prevMoves, ourMoves);
+            //Action[][] pairs = zip(prevMoves, ourMoves);
+            List<Map.Entry<Action, Action>> pairs = zipJava8(prevMoves, ourMoves);
             
             //System.out.println(pairs[0][1]);
             List<Integer> candidates = new ArrayList<Integer>();
@@ -106,7 +114,7 @@ public class HorseBot implements RoShamBot {
             for (int l = 1; l < roundsCompleted; l++) {
                 List<Integer> new_list = new ArrayList<Integer>();
                 for (int c : candidates) {
-                    if ((c >= l) && (pairs[c - l + 1].equals(pairs[pairs.length - l]))) {
+                    if ((c >= l) && (pairs.get(c - l + 1).equals(pairs.get(pairs.size() - l)))) {
                         new_list.add(c);
                     }
                 }
@@ -118,7 +126,7 @@ public class HorseBot implements RoShamBot {
                 }
             }
             
-            Action predictedNext = pairs[candidates.get(0) + 1][0];
+            Action predictedNext = pairs.get(candidates.get(0) + 1).getValue();
             Action ourMove = counter(predictedNext);
             this.prevMoves.add(lastOpponentMove);
             ourMoves.add(ourMove);
