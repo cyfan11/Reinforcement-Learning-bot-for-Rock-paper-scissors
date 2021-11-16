@@ -1,8 +1,6 @@
 import java.util.*;
 import java.util.stream.*;
 
-import javax.lang.model.util.ElementScanner6;
-
 public class HorseBotBot implements RoShamBot{
     
     int roundsCompleted;
@@ -11,11 +9,13 @@ public class HorseBotBot implements RoShamBot{
 
     ArrayList<Action> horseBotMoves;
     ArrayList<Action> botBotMoves;
+    ArrayList<Action> botBotBotMoves;
     ArrayList<Action> randMoves;
 
     public static Action[] actions = {Action.ROCK, Action.PAPER, Action.SCISSORS, Action.LIZARD, Action.SPOCK}; 
     Integer WinLoseCountH;
     Integer WinLoseCountBB;
+    Integer WinLoseCountBBB;
     Integer WinLoseCountR;
 
     public HorseBotBot() {
@@ -26,10 +26,12 @@ public class HorseBotBot implements RoShamBot{
 
         horseBotMoves = new ArrayList<Action>();
         botBotMoves = new ArrayList<Action>();
+        botBotBotMoves = new ArrayList<Action>();
         randMoves = new ArrayList<Action>();
 
         WinLoseCountH = 0;
         WinLoseCountBB = 0;
+        WinLoseCountBBB = 0;
         WinLoseCountR = 0;
     }
 
@@ -41,6 +43,8 @@ public class HorseBotBot implements RoShamBot{
                 horseBotMoves.add(Action.ROCK);
             else if (bot == 'b')
                 botBotMoves.add(Action.ROCK);
+            else if (bot == '2')
+                botBotBotMoves.add(Action.ROCK);
             else
                 randMoves.add(Action.ROCK);
 
@@ -51,6 +55,8 @@ public class HorseBotBot implements RoShamBot{
                 horseBotMoves.add(Action.PAPER);
             else if (bot == 'b')
                 botBotMoves.add(Action.PAPER);
+            else if (bot == '2')
+                botBotBotMoves.add(Action.PAPER);
             else
                 randMoves.add(Action.PAPER);
 
@@ -61,6 +67,8 @@ public class HorseBotBot implements RoShamBot{
                 horseBotMoves.add(Action.SCISSORS);
             else if (bot == 'b')
                 botBotMoves.add(Action.SCISSORS);
+            else if (bot == '2')
+                botBotBotMoves.add(Action.SCISSORS);
             else
                 randMoves.add(Action.SCISSORS);
 
@@ -71,6 +79,8 @@ public class HorseBotBot implements RoShamBot{
                 horseBotMoves.add(Action.LIZARD);
             else if (bot == 'b')
                 botBotMoves.add(Action.LIZARD);
+            else if (bot == '2')
+                botBotBotMoves.add(Action.LIZARD);
             else
                 randMoves.add(Action.LIZARD);
 
@@ -81,6 +91,8 @@ public class HorseBotBot implements RoShamBot{
                 horseBotMoves.add(Action.SPOCK);
             else if (bot == 'b')
                 botBotMoves.add(Action.SPOCK);
+            else if (bot == '2')
+                botBotBotMoves.add(Action.SPOCK);
             else
                 randMoves.add(Action.SPOCK);
 
@@ -140,12 +152,9 @@ public class HorseBotBot implements RoShamBot{
     }
 
     public Action HorseBot(Action lastOpponentMove) {
-        if (this.roundsCompleted < 2) {
-            //this.prevMoves.add(lastOpponentMove);
-            //roundsCompleted++;
+        if (this.roundsCompleted < 5) {
             return randomMove('h');
         } else {
-            //roundsCompleted++;
             List<Map.Entry<Action, Action>> pairs = zipJava8(prevMoves, ourMoves);
             List<Integer> candidates = new ArrayList<Integer>();
 
@@ -215,10 +224,6 @@ public class HorseBotBot implements RoShamBot{
         return myMove;
     }
 
-    public Action ImitatorBot(Action lastOpponentMove) {
-        return counter(prevMoves.get(prevMoves.size() - 1));
-    }
-
 
     public List<Action> lookBack(int steps, int maxLookBack) {
         List<Action> freqMove = new ArrayList<Action>();
@@ -235,6 +240,76 @@ public class HorseBotBot implements RoShamBot{
             lookBackMoves = prevMoves.subList(prevMoves.size() - maxLookBack, prevMoves.size());
         } else {
             lookBackMoves = prevMoves.subList(0, prevMoves.size());
+        }
+        
+        int index = Collections.indexOfSubList(lookBackMoves, recentMoves);
+
+        // Check for this move sequence in previous moves.
+        //Returns counter to final move in most recent sequence? So basically, to most recent move
+        while (index >= 0) {
+            //if we can safely return the next move in the sequence without going out of bounds
+            if (lookBackMoves.size() - index - recentMoves.size() > 0) {
+                freqMove.add(lookBackMoves.get(index + recentMoves.size()));
+            //otherwise just return the counter to the last move in the sequence
+            } else {
+                freqMove.add(lookBackMoves.get(index + recentMoves.size() - 1));
+            }
+            lookBackMoves = lookBackMoves.subList(index + recentMoves.size(), lookBackMoves.size());
+            index = Collections.indexOfSubList(lookBackMoves, recentMoves);
+        }
+
+        return freqMove;
+    }
+
+    public Action BotBotBot(Action lastOpponentMove) {
+        Action myMove;
+        //prevMoves.add(lastOpponentMove);
+        if (prevMoves.size() < 5) {
+            return randomMove('2');
+        }
+
+        List<Action> moveSequence = ourlookBack(1, 500);//look back at max 500 rounds for now
+
+        int i = 2;
+
+        while(i < prevMoves.size()) {
+            List<Action> maxSequence = ourlookBack(i, 500);
+            if (maxSequence.size() > 1) {
+                moveSequence = maxSequence;
+                i++;
+            } else {
+                break;
+            }
+        }
+
+        Random randInt = new Random();
+        
+        if (moveSequence.size() > 0) {
+            myMove = counter(counter(moveSequence.get(randInt.nextInt(moveSequence.size()))));
+            
+        } else {
+            myMove = randomMove('2');
+        }
+
+        botBotBotMoves.add(myMove);
+        return myMove;
+    }
+
+    public List<Action> ourlookBack(int steps, int maxLookBack) {
+        List<Action> freqMove = new ArrayList<Action>();
+        List<Action> recentMoves;
+        List<Action> lookBackMoves;
+
+        if (prevMoves.size() - steps >= 0) {//after 5 games
+            recentMoves = ourMoves.subList(ourMoves.size() - steps, ourMoves.size());
+        } else {
+            recentMoves = ourMoves.subList(0, ourMoves.size());
+        }
+
+        if (ourMoves.size() - maxLookBack >= 0) {
+            lookBackMoves = ourMoves.subList(ourMoves.size() - maxLookBack, ourMoves.size());
+        } else {
+            lookBackMoves = ourMoves.subList(0, ourMoves.size());
         }
         
         int index = Collections.indexOfSubList(lookBackMoves, recentMoves);
@@ -294,37 +369,30 @@ public class HorseBotBot implements RoShamBot{
         this.prevMoves.add(lastOpponentMove);
         Action actionH = HorseBot(lastOpponentMove);
         Action actionBB = BotBot(lastOpponentMove);
+        Action actionBBB = BotBotBot(lastOpponentMove);
         Action actionRand = randomMove('r');
-        Action actionIB = ImitatorBot(lastOpponentMove);
-        
-
-        //System.out.println("actions:");
-        //System.out.println(actionH);
-        //System.out.println(actionBB);
-        //System.out.println(actionIB);
-        //System.out.println(actionRand);
 
         roundsCompleted++;
 
-        //System.out.println("prev moves:");
+        
         for (int i = 0; i < prevMoves.size(); i++) {
-            //System.out.println(prevMoves.get(i));
             WinLoseCountH = runRound(prevMoves.get(i), horseBotMoves.get(i), WinLoseCountH);
             WinLoseCountBB = runRound(prevMoves.get(i), botBotMoves.get(i), WinLoseCountBB);
+            WinLoseCountBBB = runRound(prevMoves.get(i), botBotBotMoves.get(i), WinLoseCountBBB);
             WinLoseCountR = runRound(prevMoves.get(i), randMoves.get(i), WinLoseCountR);
         }
         Action ourAction = actionRand;
-        if (WinLoseCountH >= WinLoseCountBB && WinLoseCountH >= WinLoseCountR) {
+        if (WinLoseCountH >= WinLoseCountBB && WinLoseCountH >= WinLoseCountR && WinLoseCountH >= WinLoseCountBBB) {
             ourAction = actionH;
-        } else if (WinLoseCountBB >= WinLoseCountH && WinLoseCountBB >= WinLoseCountR) {
+        } else if (WinLoseCountBB >= WinLoseCountH && WinLoseCountBB >= WinLoseCountR && WinLoseCountBB >= WinLoseCountBBB) {
             ourAction = actionBB;
+        } else if (WinLoseCountBBB >= WinLoseCountH && WinLoseCountBBB >= WinLoseCountBB && WinLoseCountBBB >= WinLoseCountR) {
+            ourAction = actionBBB;
         } else {
             ourAction = actionRand;
         }
 
-       
-        //System.out.println("our move");
-        //System.out.println(ourAction);
+    
         ourMoves.add(ourAction);
         return ourAction;
     }
