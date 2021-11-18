@@ -125,6 +125,9 @@ public class HorseBot implements RoShamBot {
                     candidates = new_list;
                 }
             }
+
+
+            
             
             Action predictedNext = pairs.get(candidates.get(0) + 1).getValue();
             Action ourMove = counter(predictedNext);
